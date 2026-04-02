@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="All Star Contracting & Seamless Gutters LLC — CNY's Premier Contracting & Gutter Experts. Serving Syracuse and surrounding areas. Call (315) 565-9230." />
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="icon" type="image/png" href="/images/All-Star-V2.png" />
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="site-header" id="site-header">
+    <div class="header-inner container">
+      <a href="/" class="logo-link" aria-label="All Star Contracting Home">
+        <img src="/images/All-Star-V2.png" alt="All Star Contracting & Seamless Gutters LLC Logo" class="logo-img" />
+      </a>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-nav">
+        <span class="ham-bar"></span>
+        <span class="ham-bar"></span>
+        <span class="ham-bar"></span>
+      </button>
+
+      <nav class="main-nav" id="main-nav" role="navigation" aria-label="Main navigation">
+        <ul class="nav-list">
+          <li><a href="/" class="nav-link<%= path === '/' ? ' active' : '' %>">Home</a></li>
+          <li><a href="/services" class="nav-link<%= path === '/services' ? ' active' : '' %>">Services</a></li>
+          <li><a href="/contracting" class="nav-link<%= path === '/contracting' ? ' active' : '' %>">Contracting & Renovations</a></li>
+          <li><a href="/seamless-gutters" class="nav-link<%= path === '/seamless-gutters' ? ' active' : '' %>">Seamless Gutters</a></li>
+          <li><a href="/dumpster-service" class="nav-link<%= path === '/dumpster-service' ? ' active' : '' %>">Dumpster Service</a></li>
+          <li><a href="/about" class="nav-link<%= path === '/about' ? ' active' : '' %>">About</a></li>
+          <li><a href="/contact" class="nav-link nav-cta<%= path === '/contact' ? ' active' : '' %>">Contact Us</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main id="main-content">
+    <%- body %>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-inner container">
+      <div class="footer-brand">
+        <img src="/images/All-Star-V2.png" alt="All Star Contracting Logo" class="footer-logo" />
+        <p class="footer-tagline">CNY's Premier Contracting & Gutter Experts</p>
+      </div>
+
+      <div class="footer-links">
+        <h3 class="footer-heading">Quick Links</h3>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/seamless-gutters">Seamless Gutters</a></li>
+          <li><a href="/contracting">Contracting & Renovations</a></li>
+          <li><a href="/dumpster-service">Dumpster Service</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact">
+        <h3 class="footer-heading">Contact Us</h3>
+        <p><a href="tel:+13155659230">(315) 565-9230</a></p>
+        <p>2913 Milton Ave<br />Solvay, NY 13209</p>
+        <p><a href="mailto:allstarguttersjamie@gmail.com">allstarguttersjamie@gmail.com</a></p>
+        <a href="https://facebook.com/Allstarseamlessgutters2014/" target="_blank" rel="noopener noreferrer" class="fb-link" aria-label="Facebook">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.41c0-3.025 1.79-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.971h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+          </svg>
+          Follow Us on Facebook
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <p>&copy; <%= new Date().getFullYear() %> All Star Contracting & Seamless Gutters LLC. All rights reserved. | Licensed & Insured</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Hamburger menu ──
+    const hamburger = document.getElementById('hamburger');
+    const mainNav = document.getElementById('main-nav');
+
+    hamburger.addEventListener('click', function () {
+      const isOpen = mainNav.classList.toggle('nav-open');
+      hamburger.classList.toggle('ham-open', isOpen);
+      hamburger.setAttribute('aria-expanded', isOpen);
+    });
+
+    // Close nav when a link is clicked (mobile UX)
+    mainNav.querySelectorAll('.nav-link').forEach(function (link) {
+      link.addEventListener('click', function () {
+        mainNav.classList.remove('nav-open');
+        hamburger.classList.remove('ham-open');
+        hamburger.setAttribute('aria-expanded', 'false');
+      });
+    });
+
+    // ── Sticky header shadow ──
+    var header = document.getElementById('site-header');
+    window.addEventListener('scroll', function () {
+      if (window.scrollY > 10) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  </script>
+</body>
+</html>
