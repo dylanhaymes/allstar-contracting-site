@@ -109,11 +109,15 @@ app.get('/seamless-gutters', (req, res) => {
 });
 
 app.get('/contracting', (req, res) => {
-  res.render('contracting', { title: 'Contracting & Renovations | All Star Contracting & Seamless Gutters LLC' });
+  res.render('contracting', { title: 'Construction & Renovations | All Star Contracting & Seamless Gutters LLC' });
+});
+
+app.get('/excavating', (req, res) => {
+  res.render('excavating', { title: 'Excavating Services | All Star Contracting & Seamless Gutters LLC' });
 });
 
 app.get('/dumpster-service', (req, res) => {
-  res.render('dumpster-service', { title: 'Dumpster Service | All Star Contracting & Seamless Gutters LLC' });
+  res.redirect(301, '/excavating');
 });
 
 app.get('/about', (req, res) => {
