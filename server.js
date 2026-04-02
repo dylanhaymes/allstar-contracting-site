@@ -6,6 +6,7 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const nodemailer = require('nodemailer');
 const { Pool } = require('pg');
 const path = require('path');
 
@@ -41,6 +42,15 @@ async function initDb() {
     // Non-fatal — site still works without DB
   }
 }
+
+// ─── Email Transporter ─────────────────────────────────────────────────────────
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 // ─── Security Middleware ───────────────────────────────────────────────────────
 app.use(
@@ -144,6 +154,55 @@ app.post('/contact', contactLimiter, async (req, res) => {
   } catch (dbErr) {
     console.error('DB insert error:', dbErr.message);
     // Continue even if DB fails — still try to send email
+  }
+
+  // 2. Send notification email
+  try {
+    const mailOptions = {
+      from: `"All Star Contracting Website" <${process.env.EMAIL_USER}>`,
+      to: process.env.NOTIFICATION_EMAIL || 'allstarguttersjamie@gmail.com',
+      replyTo: email,
+      subject: `New Estimate Request from ${name}`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+          <div style="background: #E8640A; padding: 24px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 22px;">New Estimate Request</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">All Star Contracting & Seamless Gutters LLC</p>
+          </div>
+          <div style="padding: 32px;">
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555; width: 120px;">Name</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${escapeHtml(name)}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Phone</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee;"><a href="tel:${escapeHtml(phone)}" style="color: #E8640A;">${escapeHtml(phone)}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Email</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee;"><a href="mailto:${escapeHtml(email)}" style="color: #E8640A;">${escapeHtml(email)}</a></td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Address</td>
+                <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${escapeHtml(address || 'Not provided')}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; font-weight: bold; color: #555; vertical-align: top;">Project</td>
+                <td style="padding: 10px 0; white-space: pre-wrap;">${escapeHtml(message)}</td>
+              </tr>
+            </table>
+          </div>
+          <div style="background: #f5f5f5; padding: 16px; text-align: center; font-size: 12px; color: #888;">
+            Submitted on ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} ET &bull; IP: ${ip}
+          </div>
+        </div>
+      `,
+    };
+    await transporter.sendMail(mailOptions);
+  } catch (mailErr) {
+    console.error('Email send error:', mailErr.message);
+    // Return success anyway — DB already saved the lead
   }
 
   return res.json({ success: true });
