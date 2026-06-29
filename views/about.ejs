@@ -1,5 +1,5 @@
 <!-- ===== PAGE HERO ===== -->
-<section class="page-hero">
+<section class="page-hero" aria-label="About All Star Contracting in Syracuse, NY">
   <div class="page-hero-overlay"></div>
   <div class="container page-hero-content">
     <h1>Discover Our Story</h1>
@@ -32,7 +32,7 @@
         </div>
       </div>
       <div class="about-intro-img">
-        <img src="/images/Brandon-Walters-63378395.jpeg" alt="Brandon Walters, Owner of All Star Contracting" loading="lazy" />
+        <img src="/images/Brandon-Walters-63378395.jpeg" alt="Brandon Walters, Owner of All Star Contracting & Seamless Gutters LLC in Syracuse, NY" loading="lazy" />
         <div class="about-img-caption">
           <strong>Brandon Walters</strong>
           <span>Owner, All Star Contracting &amp; Seamless Gutters LLC</span>
@@ -92,7 +92,7 @@
     <div class="team-grid">
       <div class="team-card">
         <div class="team-img-wrap">
-          <img src="/images/Brandon-Walters-63378395.jpeg" alt="Brandon Walters" loading="lazy" />
+          <img src="/images/Brandon-Walters-63378395.jpeg" alt="Brandon Walters, Owner of All Star Contracting" loading="lazy" />
         </div>
         <div class="team-info">
           <h3>Brandon Walters</h3>
@@ -103,7 +103,7 @@
 
       <div class="team-card">
         <div class="team-img-wrap">
-          <img src="/images/Bobby-Walters.jpeg" alt="Bobby Walters" loading="lazy" />
+          <img src="/images/Bobby-Walters.jpeg" alt="Bobby Walters, Crew Member at All Star Contracting" loading="lazy" />
         </div>
         <div class="team-info">
           <h3>Bobby Walters</h3>
@@ -114,7 +114,7 @@
 
       <div class="team-card">
         <div class="team-img-wrap">
-          <img src="/images/Dale-Bowles.jpeg" alt="Dale Bowles" loading="lazy" />
+          <img src="/images/Dale-Bowles.jpeg" alt="Dale Bowles, Crew Member at All Star Contracting" loading="lazy" />
         </div>
         <div class="team-info">
           <h3>Dale Bowles</h3>
@@ -125,7 +125,7 @@
 
       <div class="team-card">
         <div class="team-img-wrap">
-          <img src="/images/Stacy-Bowles.jpeg" alt="Stacy Bowles" loading="lazy" />
+          <img src="/images/Stacy-Bowles.jpeg" alt="Stacy Bowles, Crew Member at All Star Contracting" loading="lazy" />
         </div>
         <div class="team-info">
           <h3>Stacy Bowles</h3>
@@ -187,3 +187,29 @@
     <a href="/contact" class="btn btn-primary btn-lg">Get a Free Estimate</a>
   </div>
 </section>
+
+<!-- ─── JSON-LD: AboutPage + Team ────────────────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "url": "<%= siteUrl %>/about",
+  "mainEntity": {
+    "@id": "<%= siteUrl %>/#business",
+    "@type": "GeneralContractor",
+    "name": "All Star Contracting & Seamless Gutters LLC",
+    "founder": {
+      "@type": "Person",
+      "name": "Brandon Walters",
+      "jobTitle": "Owner & Lead Contractor",
+      "image": "<%= siteUrl %>/images/Brandon-Walters-63378395.jpeg"
+    },
+    "employee": [
+      { "@type": "Person", "name": "Brandon Walters", "jobTitle": "Owner & Lead Contractor", "image": "<%= siteUrl %>/images/Brandon-Walters-63378395.jpeg" },
+      { "@type": "Person", "name": "Bobby Walters", "jobTitle": "Crew Member", "image": "<%= siteUrl %>/images/Bobby-Walters.jpeg" },
+      { "@type": "Person", "name": "Dale Bowles", "jobTitle": "Crew Member", "image": "<%= siteUrl %>/images/Dale-Bowles.jpeg" },
+      { "@type": "Person", "name": "Stacy Bowles", "jobTitle": "Crew Member", "image": "<%= siteUrl %>/images/Stacy-Bowles.jpeg" }
+    ]
+  }
+}
+</script>

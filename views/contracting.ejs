@@ -1,5 +1,5 @@
 <!-- ===== PAGE HERO ===== -->
-<section class="page-hero" style="background-image: url('/images/IMG_9079-ad2d42a6.JPEG');">
+<section class="page-hero" style="background-image: url('/images/IMG_9079-ad2d42a6.JPEG');" aria-label="Construction and renovation project in Syracuse, NY">
   <div class="page-hero-overlay"></div>
   <div class="container page-hero-content">
     <h1>Construction &amp; Renovations</h1>
@@ -140,3 +140,75 @@
     <a href="/contact" class="btn btn-primary btn-lg">Get a Free Estimate</a>
   </div>
 </section>
+
+<!-- ─── JSON-LD: Service (Construction & Renovations) ────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Construction & Renovations",
+  "name": "Construction & Renovations in Syracuse NY",
+  "description": "Full-service residential construction and renovations in Syracuse NY — roofing, siding, windows, doors, decks, additions, and interior remodels.",
+  "provider": { "@id": "<%= siteUrl %>/#business" },
+  "areaServed": [
+    { "@type": "City", "name": "Syracuse, NY" },
+    { "@type": "AdministrativeArea", "name": "Central New York" }
+  ],
+  "availableLanguage": "English",
+  "url": "<%= siteUrl %>/contracting",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Construction Services",
+    "itemListElement": [
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Roofing Installation & Repair" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Window Replacement" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Door Installation" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Siding Installation & Replacement" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Interior Renovations" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Decks & Additions" } }
+    ]
+  }
+}
+</script>
+
+<!-- ─── JSON-LD: FAQ (How It Works) ──────────────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I get an estimate for my construction or renovation project?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We come to your home, assess the project, and provide a detailed written estimate with no pressure and no obligation. Call (315) 565-9230 or fill out our contact form."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What happens after I accept the estimate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We go over materials, timelines, and any questions you have. You know exactly what to expect before we start work on your home."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What can I expect from your crew during the project?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our crew arrives on schedule, works efficiently, and keeps you informed throughout. No surprises — and we clean up the worksite completely when we are done."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are you licensed and insured?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. All Star Contracting & Seamless Gutters LLC is fully licensed and insured for residential construction and renovation work across Central New York."
+      }
+    }
+  ]
+}
+</script>

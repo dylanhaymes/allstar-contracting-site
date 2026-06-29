@@ -1,5 +1,5 @@
 <!-- ===== PAGE HERO ===== -->
-<section class="page-hero" style="background-image: url('/images/excavating-hero.jpg');">
+<section class="page-hero" style="background-image: url('/images/excavating-hero.jpg');" aria-label="Mini excavator on grassy terrain — Syracuse, NY excavating">
   <div class="page-hero-overlay"></div>
   <div class="container page-hero-content">
     <h1>Excavating Services</h1>
@@ -156,3 +156,36 @@
     <a href="/contact" class="btn btn-primary btn-lg">Get a Free Estimate</a>
   </div>
 </section>
+
+<!-- ─── JSON-LD: Service (Excavating) ────────────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Residential Excavating",
+  "name": "Excavating Services in Syracuse NY",
+  "description": "Professional residential excavating in Syracuse and Central New York — land clearing, grading, trenching, drainage, and site preparation.",
+  "provider": { "@id": "<%= siteUrl %>/#business" },
+  "areaServed": [
+    { "@type": "City", "name": "Syracuse, NY" },
+    { "@type": "City", "name": "Solvay, NY" },
+    { "@type": "City", "name": "Liverpool, NY" },
+    { "@type": "City", "name": "Camillus, NY" },
+    { "@type": "AdministrativeArea", "name": "Central New York" }
+  ],
+  "availableLanguage": "English",
+  "url": "<%= siteUrl %>/excavating",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Excavating Services",
+    "itemListElement": [
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Land Clearing" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Grading & Leveling" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Trenching" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Site Preparation" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Drainage Solutions" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Driveway & Pad Work" } }
+    ]
+  }
+}
+</script>

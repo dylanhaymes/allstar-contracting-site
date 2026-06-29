@@ -3,13 +3,169 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="All Star Contracting & Seamless Gutters LLC — CNY's Premier Contracting & Gutter Experts. Serving Syracuse and surrounding areas. Call (315) 565-9230." />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
   <title><%= title %></title>
+  <meta name="description" content="<%= typeof description !== 'undefined' && description ? description : defaultDescription %>" />
+  <meta name="robots" content="index, follow" />
+  <meta name="language" content="English" />
+  <meta name="author" content="All Star Contracting & Seamless Gutters LLC" />
+  <meta name="theme-color" content="#E8640A" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="<%= siteUrl + (typeof canonicalPath !== 'undefined' && canonicalPath ? canonicalPath : path) %>" />
+
+  <!-- OpenGraph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="<%= siteName %>" />
+  <meta property="og:title" content="<%= title %>" />
+  <meta property="og:description" content="<%= typeof description !== 'undefined' && description ? description : defaultDescription %>" />
+  <meta property="og:url" content="<%= siteUrl + (typeof canonicalPath !== 'undefined' && canonicalPath ? canonicalPath : path) %>" />
+  <meta property="og:image" content="<%= typeof ogImage !== 'undefined' && ogImage ? ogImage : defaultOgImage %>" />
+  <meta property="og:image:alt" content="All Star Contracting & Seamless Gutters LLC in Syracuse, NY" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="<%= title %>" />
+  <meta name="twitter:description" content="<%= typeof description !== 'undefined' && description ? description : defaultDescription %>" />
+  <meta name="twitter:image" content="<%= typeof ogImage !== 'undefined' && ogImage ? ogImage : defaultOgImage %>" />
+
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
   <link rel="stylesheet" href="/css/style.css" />
+
+  <!-- Favicons -->
   <link rel="icon" type="image/png" href="/images/All-Star-V2.png" />
+  <link rel="apple-touch-icon" href="/images/All-Star-V2.png" />
+
+  <!-- ─── JSON-LD: LocalBusiness ─────────────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "GeneralContractor",
+    "@id": "<%= siteUrl %>/#business",
+    "name": "All Star Contracting & Seamless Gutters LLC",
+    "alternateName": "All Star Contracting",
+    "url": "<%= siteUrl %>",
+    "logo": "<%= siteUrl %>/images/All-Star-V2.png",
+    "image": "<%= siteUrl %>/images/2-story-House-seamless-gutters-installed.jpg",
+    "description": "<%= defaultDescription %>",
+    "telephone": "+1-315-565-9230",
+    "email": "allstarguttersjamie@gmail.com",
+    "priceRange": "$$",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "2913 Milton Ave",
+      "addressLocality": "Solvay",
+      "addressRegion": "NY",
+      "postalCode": "13209",
+      "addressCountry": "US"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 43.0584,
+      "longitude": -76.2114
+    },
+    "areaServed": [
+      { "@type": "City", "name": "Syracuse, NY" },
+      { "@type": "City", "name": "Solvay, NY" },
+      { "@type": "City", "name": "Liverpool, NY" },
+      { "@type": "City", "name": "Camillus, NY" },
+      { "@type": "City", "name": "Baldwinsville, NY" },
+      { "@type": "City", "name": "Fairmount, NY" },
+      { "@type": "City", "name": "Manlius, NY" },
+      { "@type": "City", "name": "East Syracuse, NY" },
+      { "@type": "City", "name": "DeWitt, NY" },
+      { "@type": "City", "name": "Fayetteville, NY" },
+      { "@type": "City", "name": "North Syracuse, NY" },
+      { "@type": "City", "name": "Clay, NY" },
+      { "@type": "City", "name": "Cicero, NY" },
+      { "@type": "City", "name": "Marcellus, NY" },
+      { "@type": "AdministrativeArea", "name": "Central New York" }
+    ],
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+        "opens": "08:00",
+        "closes": "18:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": "Saturday",
+        "opens": "09:00",
+        "closes": "15:00"
+      }
+    ],
+    "sameAs": [
+      "https://facebook.com/Allstarseamlessgutters2014/"
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Services",
+      "itemListElement": [
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Seamless Gutter Installation", "url": "<%= siteUrl %>/seamless-gutters" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Construction & Renovations", "url": "<%= siteUrl %>/contracting" } },
+        { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Excavating Services", "url": "<%= siteUrl %>/excavating" } }
+      ]
+    }
+  }
+  </script>
+
+  <!-- ─── JSON-LD: Organization ──────────────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "<%= siteUrl %>/#organization",
+    "name": "All Star Contracting & Seamless Gutters LLC",
+    "url": "<%= siteUrl %>",
+    "logo": "<%= siteUrl %>/images/All-Star-V2.png",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+1-315-565-9230",
+      "contactType": "customer service",
+      "email": "allstarguttersjamie@gmail.com",
+      "areaServed": "US-NY",
+      "availableLanguage": ["English"]
+    },
+    "sameAs": [
+      "https://facebook.com/Allstarseamlessgutters2014/"
+    ]
+  }
+  </script>
+
+  <!-- ─── JSON-LD: WebSite ───────────────────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "<%= siteUrl %>/#website",
+    "url": "<%= siteUrl %>",
+    "name": "All Star Contracting & Seamless Gutters LLC",
+    "publisher": { "@id": "<%= siteUrl %>/#organization" },
+    "inLanguage": "en-US"
+  }
+  </script>
+
+  <% if (path && path !== '/') { %>
+  <!-- ─── JSON-LD: BreadcrumbList ─────────────────────────────────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "<%= siteUrl %>/" },
+      { "@type": "ListItem", "position": 2, "name": "<%= title.split(' | ')[0] %>", "item": "<%= siteUrl + path %>" }
+    ]
+  }
+  </script>
+  <% } %>
 </head>
 <body>
 

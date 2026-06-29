@@ -1,5 +1,5 @@
 <!-- ===== PAGE HERO ===== -->
-<section class="page-hero" style="background-image: url('/images/2-story-House-seamless-gutters-installed.jpg');">
+<section class="page-hero" style="background-image: url('/images/2-story-House-seamless-gutters-installed.jpg');" aria-label="Seamless gutter installation on a Syracuse home">
   <div class="page-hero-overlay"></div>
   <div class="container page-hero-content">
     <h1>Seamless Gutters</h1>
@@ -142,3 +142,37 @@
     <a href="/contact" class="btn btn-primary btn-lg">Get a Free Estimate</a>
   </div>
 </section>
+
+<!-- ─── JSON-LD: Service (Seamless Gutters) ──────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "serviceType": "Seamless Gutter Installation, Repair & Replacement",
+  "name": "Seamless Gutters in Syracuse NY",
+  "description": "Custom seamless aluminum gutter installation, repair, and replacement in Syracuse and Central New York. On-site fabrication, gutter guards, downspouts.",
+  "provider": { "@id": "<%= siteUrl %>/#business" },
+  "areaServed": [
+    { "@type": "City", "name": "Syracuse, NY" },
+    { "@type": "City", "name": "Solvay, NY" },
+    { "@type": "City", "name": "Liverpool, NY" },
+    { "@type": "City", "name": "Camillus, NY" },
+    { "@type": "City", "name": "Baldwinsville, NY" },
+    { "@type": "AdministrativeArea", "name": "Central New York" }
+  ],
+  "availableLanguage": "English",
+  "url": "<%= siteUrl %>/seamless-gutters",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Gutter Services",
+    "itemListElement": [
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "New Seamless Gutter Installation" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Gutter Repairs & Re-hanging" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Full Gutter System Replacement" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Downspout Installation & Extension" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Gutter Guards / Leaf Protection" } },
+      { "@type": "Offer", "itemOffered": { "@type": "Service", "name": "Free Inspections & Estimates" } }
+    ]
+  }
+}
+</script>

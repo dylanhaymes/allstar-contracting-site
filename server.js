@@ -13,6 +13,69 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ─── Site Constants ────────────────────────────────────────────────────────────
+const SITE_URL = 'https://www.allstarcny.com';
+const SITE_NAME = 'All Star Contracting & Seamless Gutters LLC';
+const DEFAULT_OG_IMAGE = SITE_URL + '/images/2-story-House-seamless-gutters-installed.jpg';
+const DEFAULT_DESCRIPTION =
+  "All Star Contracting & Seamless Gutters LLC — Syracuse NY's trusted source for seamless gutters, roofing, renovations, and excavating. Family-owned, licensed & insured. Call (315) 565-9230.";
+
+// ─── Per-Page Meta Config ──────────────────────────────────────────────────────
+const META = {
+  '/': {
+    title: 'Syracuse Contracting & Seamless Gutters | All Star Contracting',
+    description:
+      "CNY's premier contracting & seamless gutter experts. Serving Syracuse and Central New York with roofing, renovations, gutters, and excavating. Licensed & insured. Free estimates.",
+    ogImage: SITE_URL + '/images/2-story-House-seamless-gutters-installed.jpg',
+  },
+  '/services': {
+    title: 'Our Services | Syracuse NY Contracting & Gutters | All Star Contracting',
+    description:
+      'Explore full-service contracting in Syracuse NY — seamless gutters, roofing, renovations, siding, doors, windows, and excavating. Family-owned and licensed across Central New York.',
+    ogImage: SITE_URL + '/images/IMG_9085-87a3f682.JPEG',
+  },
+  '/seamless-gutters': {
+    title: 'Seamless Gutters in Syracuse NY | All Star Contracting',
+    description:
+      'Custom seamless aluminum gutter installation, repair, and replacement in Syracuse NY. On-site fabrication, gutter guards, and downspout solutions built for CNY winters. Free quotes.',
+    ogImage: SITE_URL + '/images/2-story-House-seamless-gutters-installed.jpg',
+  },
+  '/contracting': {
+    title: 'Construction & Renovations in Syracuse NY | All Star Contracting',
+    description:
+      'Full-service construction and renovation in Syracuse NY — roofing, siding, windows, doors, decks, and interior remodels. Licensed, insured, and locally trusted across Central New York.',
+    ogImage: SITE_URL + '/images/IMG_9079-ad2d42a6.JPEG',
+  },
+  '/excavating': {
+    title: 'Excavating Services in Syracuse NY | All Star Contracting',
+    description:
+      'Professional residential excavating in Syracuse and Central NY — land clearing, grading, trenching, drainage, and site prep. Local crew, own equipment, honest pricing.',
+    ogImage: SITE_URL + '/images/excavating-hero.jpg',
+  },
+  '/about': {
+    title: 'About Us | Family-Owned Syracuse Contractor | All Star Contracting',
+    description:
+      'Meet the All Star Contracting team — a family-owned, licensed Syracuse NY contractor serving Solvay, Liverpool, Camillus, Baldwinsville, and all of Central New York.',
+    ogImage: SITE_URL + '/images/Brandon-Walters-63378395.jpeg',
+  },
+  '/contact': {
+    title: 'Contact Us | Free Estimate | All Star Contracting Syracuse NY',
+    description:
+      "Request a free estimate from All Star Contracting & Seamless Gutters LLC. Call (315) 565-9230 or message us — we respond within one business day. Serving all of Syracuse, NY.",
+    ogImage: SITE_URL + '/images/2-story-House-seamless-gutters-installed.jpg',
+  },
+};
+
+function metaFor(reqPath) {
+  return (
+    META[reqPath] || {
+      title: SITE_NAME,
+      description: DEFAULT_DESCRIPTION,
+      ogImage: DEFAULT_OG_IMAGE,
+    }
+  );
+}
+
 // ─── Database ──────────────────────────────────────────────────────────────────
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -89,43 +152,79 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layout');
 
-// ─── Helper: Active Nav ────────────────────────────────────────────────────────
+// ─── Helper: Active Nav + Global Locals ───────────────────────────────────────
 app.use((req, res, next) => {
   res.locals.path = req.path;
+  res.locals.siteUrl = SITE_URL;
+  res.locals.siteName = SITE_NAME;
+  res.locals.defaultOgImage = DEFAULT_OG_IMAGE;
+  res.locals.defaultDescription = DEFAULT_DESCRIPTION;
   next();
 });
 
+// ─── Helper: Render with meta ─────────────────────────────────────────────────
+function renderPage(res, view, reqPath, extra = {}) {
+  const m = metaFor(reqPath);
+  res.render(view, {
+    title: m.title,
+    description: m.description,
+    ogImage: m.ogImage,
+    canonicalPath: reqPath,
+    ...extra,
+  });
+}
+
 // ─── GET Routes ───────────────────────────────────────────────────────────────
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Home | All Star Contracting & Seamless Gutters LLC' });
-});
-
-app.get('/services', (req, res) => {
-  res.render('services', { title: 'Services | All Star Contracting & Seamless Gutters LLC' });
-});
-
-app.get('/seamless-gutters', (req, res) => {
-  res.render('seamless-gutters', { title: 'Seamless Gutters | All Star Contracting & Seamless Gutters LLC' });
-});
-
-app.get('/contracting', (req, res) => {
-  res.render('contracting', { title: 'Construction & Renovations | All Star Contracting & Seamless Gutters LLC' });
-});
-
-app.get('/excavating', (req, res) => {
-  res.render('excavating', { title: 'Excavating Services | All Star Contracting & Seamless Gutters LLC' });
-});
+app.get('/', (req, res) => renderPage(res, 'index', '/'));
+app.get('/services', (req, res) => renderPage(res, 'services', '/services'));
+app.get('/seamless-gutters', (req, res) => renderPage(res, 'seamless-gutters', '/seamless-gutters'));
+app.get('/contracting', (req, res) => renderPage(res, 'contracting', '/contracting'));
+app.get('/excavating', (req, res) => renderPage(res, 'excavating', '/excavating'));
+app.get('/about', (req, res) => renderPage(res, 'about', '/about'));
+app.get('/contact', (req, res) => renderPage(res, 'contact', '/contact'));
 
 app.get('/dumpster-service', (req, res) => {
   res.redirect(301, '/excavating');
 });
 
-app.get('/about', (req, res) => {
-  res.render('about', { title: 'About Us | All Star Contracting & Seamless Gutters LLC' });
+// ─── robots.txt ───────────────────────────────────────────────────────────────
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(
+    'User-agent: *\n' +
+    'Allow: /\n' +
+    `Sitemap: ${SITE_URL}/sitemap.xml\n`
+  );
 });
 
-app.get('/contact', (req, res) => {
-  res.render('contact', { title: 'Contact Us | All Star Contracting & Seamless Gutters LLC' });
+// ─── sitemap.xml ──────────────────────────────────────────────────────────────
+app.get('/sitemap.xml', (req, res) => {
+  const today = new Date().toISOString().split('T')[0];
+  const pages = [
+    { loc: '/', priority: '1.0', changefreq: 'weekly' },
+    { loc: '/services', priority: '0.9', changefreq: 'monthly' },
+    { loc: '/seamless-gutters', priority: '0.9', changefreq: 'monthly' },
+    { loc: '/contracting', priority: '0.9', changefreq: 'monthly' },
+    { loc: '/excavating', priority: '0.9', changefreq: 'monthly' },
+    { loc: '/about', priority: '0.7', changefreq: 'monthly' },
+    { loc: '/contact', priority: '0.8', changefreq: 'monthly' },
+  ];
+
+  const urls = pages
+    .map(
+      (p) =>
+        `  <url>\n    <loc>${SITE_URL}${p.loc}</loc>\n    <lastmod>${today}</lastmod>\n    <changefreq>${p.changefreq}</changefreq>\n    <priority>${p.priority}</priority>\n  </url>`
+    )
+    .join('\n');
+
+  const xml =
+    '<?xml version="1.0" encoding="UTF-8"?>\n' +
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
+    urls +
+    '\n</urlset>\n';
+
+  res.type('application/xml');
+  res.send(xml);
 });
 
 // ─── POST /contact ─────────────────────────────────────────────────────────────
@@ -160,7 +259,7 @@ app.post('/contact', contactLimiter, async (req, res) => {
     // Continue even if DB fails — still try to send email
   }
 
-  // 2. Send notification email
+  // 2. Send notification email (kept for when EMAIL_PASS is configured)
   try {
     const mailOptions = {
       from: `"All Star Contracting Website" <${process.env.EMAIL_USER}>`,
@@ -209,12 +308,46 @@ app.post('/contact', contactLimiter, async (req, res) => {
     // Return success anyway — DB already saved the lead
   }
 
+  // 3. Fire-and-forget POST to Make webhook for reliable email notifications
+  if (process.env.MAKE_WEBHOOK_URL) {
+    const payload = {
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      address: (address || '').trim(),
+      message: message.trim(),
+      timestamp: new Date().toISOString(),
+      source: 'website',
+    };
+
+    // Don't await — fire and forget so we don't block the user response
+    fetch(process.env.MAKE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+      .then((r) => {
+        if (!r.ok) {
+          console.error(`Make webhook returned non-OK status: ${r.status} ${r.statusText}`);
+        }
+      })
+      .catch((webhookErr) => {
+        console.error('Make webhook error:', webhookErr.message);
+      });
+  }
+
   return res.json({ success: true });
 });
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
 app.use((req, res) => {
-  res.status(404).render('404', { title: 'Page Not Found | All Star Contracting' });
+  res.set('X-Robots-Tag', 'noindex');
+  res.status(404).render('404', {
+    title: 'Page Not Found | All Star Contracting',
+    description: "Sorry, that page doesn't exist. Return home or get in touch with All Star Contracting in Syracuse, NY.",
+    ogImage: DEFAULT_OG_IMAGE,
+    canonicalPath: req.path,
+  });
 });
 
 // ─── Error Handler ─────────────────────────────────────────────────────────────

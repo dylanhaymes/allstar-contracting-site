@@ -1,5 +1,5 @@
 <!-- ===== HERO ===== -->
-<section class="hero" style="background-image: url('/images/2-story-House-seamless-gutters-installed.jpg');">
+<section class="hero" style="background-image: url('/images/2-story-House-seamless-gutters-installed.jpg');" aria-label="Seamless gutters installed on a two-story home in Syracuse, NY">
   <div class="hero-overlay"></div>
   <div class="hero-content container">
     <p class="hero-eyebrow">Serving Syracuse &amp; Central New York</p>
@@ -183,3 +183,47 @@
     <a href="/contact" class="btn btn-primary btn-lg">Schedule a Free Estimate</a>
   </div>
 </section>
+
+<!-- ─── JSON-LD: Reviews & AggregateRating ───────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "GeneralContractor",
+  "@id": "<%= siteUrl %>/#business",
+  "name": "All Star Contracting & Seamless Gutters LLC",
+  "url": "<%= siteUrl %>",
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "5.0",
+    "reviewCount": "4",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "review": [
+    {
+      "@type": "Review",
+      "author": { "@type": "Person", "name": "Will D." },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "reviewBody": "These guys were prompt, professional, timely, and extremely good communicators. Their pricing was spot on. They respond immediately to any concerns. I highly recommend All Star."
+    },
+    {
+      "@type": "Review",
+      "author": { "@type": "Person", "name": "Barbara G." },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "reviewBody": "The team was kind and professional. They worked together to get the job done. I would recommend them to anyone I know."
+    },
+    {
+      "@type": "Review",
+      "author": { "@type": "Person", "name": "Elizabeth K." },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "reviewBody": "All Star Contracting rebuilt my retaining wall. They did a great job and exceeded my expectations! I highly recommend them!"
+    },
+    {
+      "@type": "Review",
+      "author": { "@type": "Person", "name": "Ben S." },
+      "reviewRating": { "@type": "Rating", "ratingValue": "5", "bestRating": "5" },
+      "reviewBody": "A++ things done the right way. Highly recommend! All Star has done a great job on our home improvements — very easy to work with and great suggestions."
+    }
+  ]
+}
+</script>

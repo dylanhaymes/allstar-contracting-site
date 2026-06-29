@@ -1,5 +1,5 @@
 <!-- ===== PAGE HERO ===== -->
-<section class="page-hero page-hero-short">
+<section class="page-hero page-hero-short" aria-label="Contact All Star Contracting in Solvay / Syracuse, NY">
   <div class="page-hero-overlay"></div>
   <div class="container page-hero-content">
     <h1>Schedule an Estimate</h1>
@@ -134,6 +134,46 @@
     </div>
   </div>
 </section>
+
+<!-- ─── JSON-LD: ContactPage + ContactPoint ──────────────────────────────── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Contact All Star Contracting & Seamless Gutters LLC",
+  "url": "<%= siteUrl %>/contact",
+  "mainEntity": {
+    "@id": "<%= siteUrl %>/#business",
+    "@type": "GeneralContractor",
+    "name": "All Star Contracting & Seamless Gutters LLC",
+    "telephone": "+1-315-565-9230",
+    "email": "allstarguttersjamie@gmail.com",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "2913 Milton Ave",
+      "addressLocality": "Solvay",
+      "addressRegion": "NY",
+      "postalCode": "13209",
+      "addressCountry": "US"
+    },
+    "contactPoint": [
+      {
+        "@type": "ContactPoint",
+        "telephone": "+1-315-565-9230",
+        "contactType": "customer service",
+        "areaServed": "US-NY",
+        "availableLanguage": ["English"]
+      },
+      {
+        "@type": "ContactPoint",
+        "email": "allstarguttersjamie@gmail.com",
+        "contactType": "sales",
+        "areaServed": "US-NY"
+      }
+    ]
+  }
+}
+</script>
 
 <script>
 (function () {
