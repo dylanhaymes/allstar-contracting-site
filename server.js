@@ -227,6 +227,104 @@ app.get('/sitemap.xml', (req, res) => {
   res.send(xml);
 });
 
+// ─── Spam / Bot Detection ──────────────────────────────────────────────────────
+//
+// isSpam(fields) inspects a contact submission and returns a short string reason
+// if it looks like spam/bot traffic, or null if it looks legitimate.
+//
+// Design goals:
+//   • Catch the Russian/Cyrillic + scam-link spam the owner has been getting.
+//   • NEVER block a legitimate Syracuse-area gutter/contracting customer, who
+//     writes in English, whose name has no URLs, and who at most pastes a single
+//     link (e.g. a Google Maps link to their property).
+//
+// All thresholds live in the constants below so they're easy to tune.
+const SPAM_THRESHOLDS = {
+  // Minimum count of characters in a given non-Latin script before we flag it.
+  // A stray accented/pasted char shouldn't trip it; a flood of Cyrillic will.
+  CYRILLIC_MAX: 2, // flag when 3+ Cyrillic chars are present
+  CJK_MAX: 2,      // flag when 3+ Chinese/Japanese/Korean chars are present
+  ARABIC_MAX: 2,   // flag when 3+ Arabic chars are present
+  // How many URLs are allowed in the message body. One link is fine (a customer
+  // might paste their address's Google Maps link); two or more is spam.
+  MAX_MESSAGE_URLS: 1,
+  // Hard cap on message length — spam dumps are enormous.
+  MAX_MESSAGE_LENGTH: 3000,
+};
+
+// Case-insensitive keyword/substring blocklist. Add new terms here as they show
+// up. Kept as plain lowercase strings so it's readable and trivial to extend.
+const SPAM_KEYWORDS = [
+  'viagra', 'cialis', 'casino', 'crypto', 'bitcoin', 'forex', 'loan',
+  'seo service', 'backlink', 'escort', 'betting', 'porn', 'payday',
+  '投资', 'кредит', 'займ', 'ставки', 'казино',
+];
+
+function isSpam(fields) {
+  const name = (fields.name || '').toString();
+  const address = (fields.address || '').toString();
+  const message = (fields.message || '').toString();
+  const honeypot = (fields.company_url || '').toString();
+
+  // Rule 1: Honeypot filled. Real users never see or tab to this hidden field,
+  // so any value at all means an automated bot filled it. Strongest signal.
+  if (honeypot.trim().length > 0) {
+    return 'honeypot filled';
+  }
+
+  // Rule 2: URL/link in the NAME field. Real names never contain links; spam
+  // bots stuff URLs everywhere. Matches http(s)://, www., <a tags, [url], .ru,
+  // and common shorteners.
+  if (/https?:\/\/|www\.|<a\s|\[url|\.ru\b|bit\.ly|tinyurl/i.test(name)) {
+    return 'url in name';
+  }
+
+  // Rule 3: Two or more URLs in the MESSAGE. One link is allowed (a customer
+  // pasting a Maps/photo link); 2+ is a link-spam dump.
+  const urlMatches = message.match(/https?:\/\/|www\./gi) || [];
+  if (urlMatches.length > SPAM_THRESHOLDS.MAX_MESSAGE_URLS) {
+    return `too many links (${urlMatches.length})`;
+  }
+
+  const combined = name + ' ' + message + ' ' + address;
+
+  // Rule 4: Cyrillic script flood. This is a Syracuse-local, English-only
+  // business — a burst of Cyrillic is Russian spam.
+  const cyrillic = combined.match(/[Ѐ-ӿ]/g) || [];
+  if (cyrillic.length > SPAM_THRESHOLDS.CYRILLIC_MAX) {
+    return `cyrillic script (${cyrillic.length} chars)`;
+  }
+
+  // Rule 5: CJK script flood (Chinese / Japanese kana / Korean Hangul).
+  const cjk = combined.match(/[一-鿿぀-ヿ가-힯]/g) || [];
+  if (cjk.length > SPAM_THRESHOLDS.CJK_MAX) {
+    return `cjk script (${cjk.length} chars)`;
+  }
+
+  // Rule 6: Arabic script flood.
+  const arabic = combined.match(/[؀-ۿ]/g) || [];
+  if (arabic.length > SPAM_THRESHOLDS.ARABIC_MAX) {
+    return `arabic script (${arabic.length} chars)`;
+  }
+
+  // Rule 7: Spam keyword blocklist (case-insensitive substring match across
+  // name + message + address).
+  const haystack = combined.toLowerCase();
+  for (const kw of SPAM_KEYWORDS) {
+    if (haystack.includes(kw.toLowerCase())) {
+      return `spam keyword (${kw})`;
+    }
+  }
+
+  // Rule 8: Oversized message — legitimate project descriptions are never this
+  // long; spam dumps are.
+  if (message.length > SPAM_THRESHOLDS.MAX_MESSAGE_LENGTH) {
+    return `message too long (${message.length} chars)`;
+  }
+
+  return null;
+}
+
 // ─── POST /contact ─────────────────────────────────────────────────────────────
 app.post('/contact', contactLimiter, async (req, res) => {
   const { name, phone, email, address, message } = req.body;
@@ -247,16 +345,35 @@ app.post('/contact', contactLimiter, async (req, res) => {
     req.socket?.remoteAddress ||
     'unknown';
 
-  // 1. Save to database
+  // ── Spam / bot check ──────────────────────────────────────────────────────
+  // Run heuristics on the raw submission. If it's spam we still record it to the
+  // DB (as source='spam-filtered' so a false-positive is recoverable) but we
+  // suppress ALL owner notifications (email + Make webhook) so it never reaches
+  // the inbox. We return the SAME success response so bots can't detect the
+  // filter and a false-positived human isn't shown an error.
+  const spamReason = isSpam(req.body);
+  const leadSource = spamReason ? 'spam-filtered' : 'website';
+  if (spamReason) {
+    console.warn(`Spam filtered: ${spamReason} from ${ip}`);
+  }
+
+  // 1. Save to database (clean leads as 'website', spam as 'spam-filtered')
   try {
     await pool.query(
-      `INSERT INTO leads (name, phone, email, address, message, ip_address)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [name.trim(), phone.trim(), email.trim(), (address || '').trim(), message.trim(), ip]
+      `INSERT INTO leads (name, phone, email, address, message, ip_address, source)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [name.trim(), phone.trim(), email.trim(), (address || '').trim(), message.trim(), ip, leadSource]
     );
   } catch (dbErr) {
     console.error('DB insert error:', dbErr.message);
-    // Continue even if DB fails — still try to send email
+    // Continue even if DB fails — a DB error must not block the response
+  }
+
+  // Spam submissions stop here: recorded to the DB above, but never forwarded
+  // to the owner (no email, no Make webhook). Same success response as a clean
+  // submission so the filter is invisible.
+  if (spamReason) {
+    return res.json({ success: true });
   }
 
   // 2. Send notification email (kept for when EMAIL_PASS is configured)

@@ -58,6 +58,12 @@
             <span class="field-error" id="message-error" role="alert"></span>
           </div>
 
+          <!-- Honeypot: hidden from real users, tempting to bots. If filled, submission is spam. -->
+          <div style="position:absolute;left:-9999px;top:-9999px;height:0;width:0;overflow:hidden;" aria-hidden="true">
+            <label for="company_url">Company Website (leave this blank)</label>
+            <input type="text" id="company_url" name="company_url" tabindex="-1" autocomplete="off" />
+          </div>
+
           <button type="submit" class="btn btn-primary btn-submit" id="submit-btn">
             <span class="btn-label">SEND</span>
             <span class="btn-spinner" aria-hidden="true" style="display:none;">
@@ -237,12 +243,14 @@
     btnLabel.style.display = 'none';
     btnSpinner.style.display = 'inline-flex';
 
+    var honeypotEl = document.getElementById('company_url');
     var data = {
       name: document.getElementById('name').value.trim(),
       phone: document.getElementById('phone').value.trim(),
       email: document.getElementById('email').value.trim(),
       address: document.getElementById('address').value.trim(),
       message: document.getElementById('message').value.trim(),
+      company_url: honeypotEl ? honeypotEl.value : '',
     };
 
     fetch('/contact', {
