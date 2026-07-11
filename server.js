@@ -6,7 +6,6 @@ const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const nodemailer = require('nodemailer');
 const { Pool } = require('pg');
 const path = require('path');
 
@@ -80,6 +79,10 @@ function metaFor(reqPath) {
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  // Fail fast instead of hanging /contact if the DB is reachable-but-stalled.
+  connectionTimeoutMillis: 4000,
+  statement_timeout: 4000,
+  query_timeout: 4000,
 });
 
 async function initDb() {
@@ -105,15 +108,6 @@ async function initDb() {
     // Non-fatal — site still works without DB
   }
 }
-
-// ─── Email Transporter ─────────────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 // ─── Security Middleware ───────────────────────────────────────────────────────
 app.use(
@@ -334,6 +328,12 @@ app.post('/contact', contactLimiter, async (req, res) => {
     return res.status(400).json({ success: false, error: 'All fields are required.' });
   }
 
+  // Reject non-string fields up front. A real browser form only sends strings; a bot posting JSON
+  // with a number/object would otherwise crash `.trim()` later (async reject → hung request).
+  if ([name, phone, email, address, message].some((v) => v != null && typeof v !== 'string')) {
+    return res.status(400).json({ success: false, error: 'Invalid input.' });
+  }
+
   // Basic email format check
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
@@ -357,7 +357,31 @@ app.post('/contact', contactLimiter, async (req, res) => {
     console.warn(`Spam filtered: ${spamReason} from ${ip}`);
   }
 
-  // 1. Save to database (clean leads as 'website', spam as 'spam-filtered')
+  // 1. Rapid-duplicate guard: if an identical submission (same email + same message) already
+  //    landed in the last 5 minutes, treat this as an accidental re-send (a network retry or a
+  //    double-tap) — skip the insert AND the notification and return the same success response.
+  //    This prevents duplicate LEADS without ever blocking a legitimate repeat customer, who
+  //    would submit days apart (different timestamp) or about a different project (different message).
+  if (!spamReason) {
+    try {
+      const recent = await pool.query(
+        `SELECT 1 FROM leads
+          WHERE email = $1 AND message = $2 AND source = 'website'
+            AND submitted_at > NOW() - INTERVAL '5 minutes'
+          LIMIT 1`,
+        [email.trim(), message.trim()]
+      );
+      if (recent.rowCount > 0) {
+        console.warn(`Duplicate suppressed: ${email.trim()} (identical submission within 5 min)`);
+        return res.json({ success: true });
+      }
+    } catch (dupErr) {
+      console.error('Dedup check error:', dupErr.message);
+      // If the check itself fails, fall through and process normally — never lose a real lead.
+    }
+  }
+
+  // 2. Save to database (clean leads as 'website', spam as 'spam-filtered')
   try {
     await pool.query(
       `INSERT INTO leads (name, phone, email, address, message, ip_address, source)
@@ -369,63 +393,15 @@ app.post('/contact', contactLimiter, async (req, res) => {
     // Continue even if DB fails — a DB error must not block the response
   }
 
-  // Spam submissions stop here: recorded to the DB above, but never forwarded
-  // to the owner (no email, no Make webhook). Same success response as a clean
-  // submission so the filter is invisible.
+  // Spam submissions stop here: recorded to the DB above, but never forwarded to the owner.
   if (spamReason) {
     return res.json({ success: true });
   }
 
-  // 2. Send notification email (kept for when EMAIL_PASS is configured)
-  try {
-    const mailOptions = {
-      from: `"All Star Contracting Website" <${process.env.EMAIL_USER}>`,
-      to: process.env.NOTIFICATION_EMAIL || 'allstarguttersjamie@gmail.com',
-      replyTo: email,
-      subject: `New Estimate Request from ${name}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
-          <div style="background: #E8640A; padding: 24px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 22px;">New Estimate Request</h1>
-            <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0;">All Star Contracting & Seamless Gutters LLC</p>
-          </div>
-          <div style="padding: 32px;">
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555; width: 120px;">Name</td>
-                <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${escapeHtml(name)}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Phone</td>
-                <td style="padding: 10px 0; border-bottom: 1px solid #eee;"><a href="tel:${escapeHtml(phone)}" style="color: #E8640A;">${escapeHtml(phone)}</a></td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Email</td>
-                <td style="padding: 10px 0; border-bottom: 1px solid #eee;"><a href="mailto:${escapeHtml(email)}" style="color: #E8640A;">${escapeHtml(email)}</a></td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #eee; font-weight: bold; color: #555;">Address</td>
-                <td style="padding: 10px 0; border-bottom: 1px solid #eee;">${escapeHtml(address || 'Not provided')}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; font-weight: bold; color: #555; vertical-align: top;">Project</td>
-                <td style="padding: 10px 0; white-space: pre-wrap;">${escapeHtml(message)}</td>
-              </tr>
-            </table>
-          </div>
-          <div style="background: #f5f5f5; padding: 16px; text-align: center; font-size: 12px; color: #888;">
-            Submitted on ${new Date().toLocaleString('en-US', { timeZone: 'America/New_York' })} ET &bull; IP: ${ip}
-          </div>
-        </div>
-      `,
-    };
-    await transporter.sendMail(mailOptions);
-  } catch (mailErr) {
-    console.error('Email send error:', mailErr.message);
-    // Return success anyway — DB already saved the lead
-  }
-
-  // 3. Fire-and-forget POST to Make webhook for reliable email notifications
+  // 3. Notify the owner — ONE path, via the Make webhook. The Make scenario "All Star - Website
+  //    Contact Form Notification" emails all three recipients (Jamie, Scale It, Dylan). The
+  //    server's own nodemailer email was removed 2026-07-11: it sent an IDENTICAL notification to
+  //    the same three people, so every lead arrived twice. Make is the single notifier now.
   if (process.env.MAKE_WEBHOOK_URL) {
     const payload = {
       name: name.trim(),
@@ -437,20 +413,31 @@ app.post('/contact', contactLimiter, async (req, res) => {
       source: 'website',
     };
 
-    // Don't await — fire and forget so we don't block the user response
-    fetch(process.env.MAKE_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-      .then((r) => {
-        if (!r.ok) {
-          console.error(`Make webhook returned non-OK status: ${r.status} ${r.statusText}`);
-        }
+    // Fire-and-forget so we never block the user. Retry ONLY on a network-level failure (fetch
+    // rejects → Make never received it) so a transient blip doesn't drop the sole notification. A
+    // non-2xx RESPONSE is logged but NOT retried — Make may have already received and run the
+    // scenario, so retrying could re-send. The lead is saved to the DB regardless.
+    const notify = (attempt) =>
+      fetch(process.env.MAKE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
-      .catch((webhookErr) => {
-        console.error('Make webhook error:', webhookErr.message);
-      });
+        .then((r) => {
+          if (!r.ok) {
+            console.error(`Make webhook responded ${r.status} ${r.statusText} for lead ${email.trim()} — check the scenario (not retried, to avoid a double-send).`);
+          }
+        })
+        .catch((err) => {
+          if (attempt < 2) {
+            setTimeout(() => notify(attempt + 1), 2000);
+          } else {
+            console.error(`Make webhook unreachable after retry — lead ${email.trim()} saved to DB but NOT emailed: ${err.message}`);
+          }
+        });
+    notify(1);
+  } else {
+    console.error(`MAKE_WEBHOOK_URL not set — lead ${email.trim()} saved to DB but NO notification sent!`);
   }
 
   return res.json({ success: true });
@@ -473,18 +460,13 @@ app.use((err, req, res, next) => {
   res.status(500).send('Something went wrong. Please try again.');
 });
 
-// ─── HTML Escape Helper ────────────────────────────────────────────────────────
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
-
 // ─── Start ────────────────────────────────────────────────────────────────────
+if (!process.env.MAKE_WEBHOOK_URL) {
+  console.error(
+    'WARNING: MAKE_WEBHOOK_URL is not set. The Make webhook is now the SOLE lead notifier — ' +
+    'without it, leads are saved to the DB but nobody is emailed. Set it in the Railway env.'
+  );
+}
 initDb().then(() => {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`All Star Contracting server running on port ${PORT}`);
