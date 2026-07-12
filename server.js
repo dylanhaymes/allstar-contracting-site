@@ -254,6 +254,11 @@ const SPAM_KEYWORDS = [
   '投资', 'кредит', 'займ', 'ставки', 'казино',
 ];
 
+// Exact-ish NAME blocklist for known repeat bot submitters (owner-reported, arriving daily).
+// Matched against the name with all non-letters stripped, so it only hits the bot's mashed name
+// ('IsaacBah'), never a real customer.
+const SPAM_NAMES = ['isaacbah', 'robertproff'];
+
 function isSpam(fields) {
   const name = (fields.name || '').toString();
   const address = (fields.address || '').toString();
@@ -314,6 +319,21 @@ function isSpam(fields) {
   // long; spam dumps are.
   if (message.length > SPAM_THRESHOLDS.MAX_MESSAGE_LENGTH) {
     return `message too long (${message.length} chars)`;
+  }
+
+  // Rule 9: Known repeat-bot NAME blocklist (e.g. IsaacBah, RobertProff — submitted daily).
+  const nameKey = name.toLowerCase().replace(/[^a-z]/g, '');
+  if (nameKey && SPAM_NAMES.includes(nameKey)) {
+    return `blocked name (${name.trim()})`;
+  }
+
+  // Rule 10: Invalid phone. A real Syracuse-area customer enters a US number — 10 digits, or 11 with
+  // a leading 1. Bot spam uses junk 11-digit numbers that DON'T start with 1 (e.g. 81968784411), plus
+  // anything absurdly long/short. Lenient on 7-10 so a human typing a local/partial number is safe.
+  const phoneDigits = (fields.phone || '').toString().replace(/\D/g, '');
+  if ((phoneDigits.length === 11 && phoneDigits[0] !== '1') ||
+      phoneDigits.length > 11 || phoneDigits.length < 7) {
+    return `invalid phone (${phoneDigits || 'empty'})`;
   }
 
   return null;
